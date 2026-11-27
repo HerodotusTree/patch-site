@@ -1,0 +1,602 @@
+<!-- 333: 1: 1:.01: 1: 1:.02:.03: -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="signature" content="333: 1: 1:.01: 1: 1:.02:.03:">
+<link rel="icon" href="data:,">
+<title>Patch! Error Decoder — Paste an error, get plain English</title>
+<style>
+  :root{
+    --navy:#0a1424;
+    --navy-2:#0e1c33;
+    --card:#12233d;
+    --card-2:#162a47;
+    --line:#243a5c;
+    --line-soft:#1c2f4e;
+    --text:#eef2f8;
+    --muted:#a8b8d0;
+    --faint:#7e93b3;
+    --amber:#f2a81d;
+    --amber-dark:#1a1200;
+    --amber-soft:rgba(242,168,29,.12);
+    --green:#3ecf8e;
+    --red:#ff6b6b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--navy);
+    color:var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  button, input, textarea{font:inherit}
+  button, [role="button"]{min-height:44px}
+  a{color:var(--amber)}
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 48px}
+
+  /* Header */
+  header{padding:28px 0 8px}
+  .brand-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .brand{
+    font-weight:900;letter-spacing:.04em;font-size:22px;color:var(--amber);
+    border:2px solid var(--amber);padding:4px 12px 5px;border-radius:8px;line-height:1;
+  }
+  .brand-sub{font-size:13px;color:var(--muted);letter-spacing:.02em}
+  h1{
+    font-size:clamp(34px,8vw,52px);line-height:1.02;letter-spacing:-.02em;
+    margin:22px 0 10px;font-weight:850;
+  }
+  h1 em{font-style:normal;color:var(--amber)}
+  .subhead{font-size:17px;color:var(--muted);margin:0;max-width:34em}
+  .subhead strong{color:var(--text);font-weight:650}
+
+  /* Decoder card */
+  .decoder{
+    margin-top:24px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px;
+  }
+  .decoder label{font-weight:700;font-size:15px;display:block;margin-bottom:4px}
+  .decoder .hint{font-size:13.5px;color:var(--faint);margin:0 0 10px}
+  textarea{
+    width:100%;min-height:118px;resize:vertical;
+    background:var(--navy-2);color:var(--text);
+    border:1.5px solid var(--line);border-radius:10px;
+    padding:13px 14px;font-size:15.5px;line-height:1.5;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  textarea::placeholder{color:var(--faint);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  textarea:focus{outline:2px solid var(--amber);outline-offset:1px;border-color:var(--amber)}
+  .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .btn-decode{
+    flex:1 1 180px;background:var(--amber);color:var(--amber-dark);
+    border:0;border-radius:10px;font-weight:800;font-size:16.5px;
+    padding:12px 20px;cursor:pointer;letter-spacing:.01em;
+  }
+  .btn-decode:active{transform:translateY(1px)}
+  .btn-clear{
+    background:transparent;color:var(--muted);border:1.5px solid var(--line);
+    border-radius:10px;font-weight:650;font-size:15px;padding:12px 18px;cursor:pointer;
+  }
+  .btn-clear:hover{color:var(--text);border-color:var(--faint)}
+  .kbd-hint{font-size:12.5px;color:var(--faint);margin:9px 2px 0}
+  kbd{
+    background:var(--navy-2);border:1px solid var(--line);border-bottom-width:2px;
+    border-radius:5px;padding:1px 6px;font-size:11.5px;font-family:inherit;
+  }
+  .privacy{
+    display:flex;gap:8px;align-items:flex-start;margin-top:14px;
+    font-size:13.5px;color:var(--muted);
+    background:var(--amber-soft);border:1px solid rgba(242,168,29,.35);
+    border-radius:9px;padding:10px 12px;
+  }
+  .privacy svg{flex:0 0 auto;margin-top:2px}
+  .privacy strong{color:var(--text)}
+
+  /* Example chips */
+  .examples{margin-top:20px}
+  .examples p{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0 0 9px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    background:var(--card);border:1px solid var(--line);color:var(--text);
+    border-radius:999px;padding:9px 14px;font-size:13.5px;cursor:pointer;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;min-height:40px;
+  }
+  .chip:hover{border-color:var(--amber);color:var(--amber)}
+  .chip.plain{font-family:inherit}
+
+  /* Result */
+  #result{margin-top:22px;display:none}
+  #result.show{display:block}
+  .result-card{
+    background:var(--card);border:1px solid var(--line);border-top:4px solid var(--amber);
+    border-radius:var(--radius);padding:20px 18px 18px;
+  }
+  .result-card.no-match{border-top-color:var(--faint)}
+  .code-line{
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    font-size:13px;color:var(--amber);letter-spacing:.03em;word-break:break-word;
+  }
+  .result-card h2{font-size:24px;line-height:1.2;margin:6px 0 4px;letter-spacing:-.01em}
+  .matched-note{font-size:13px;color:var(--faint);margin:0 0 14px}
+  .matched-note code{color:var(--muted);word-break:break-word}
+  .block{margin-top:16px}
+  .block h3{
+    font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);
+    margin:0 0 6px;font-weight:800;
+  }
+  .block p{margin:0;font-size:16px}
+  .block ol{margin:0;padding-left:22px}
+  .block ol li{font-size:15.5px;margin-bottom:7px;padding-left:2px}
+  .block ol li::marker{color:var(--amber);font-weight:800}
+  .bigger{
+    margin-top:18px;background:var(--navy-2);border:1px solid var(--line-soft);
+    border-radius:10px;padding:13px 14px;
+  }
+  .bigger h3{color:var(--red)}
+  .bigger p{font-size:15px;color:var(--text)}
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .btn-ghost{
+    background:transparent;border:1.5px solid var(--line);color:var(--text);
+    border-radius:9px;padding:10px 16px;font-weight:650;font-size:14.5px;cursor:pointer;min-height:44px;
+  }
+  .btn-ghost:hover{border-color:var(--amber);color:var(--amber)}
+  .copy-ok{font-size:13.5px;color:var(--green);align-self:center;display:none}
+
+  /* CTA */
+  .cta{
+    margin-top:18px;background:var(--amber);color:var(--amber-dark);
+    border-radius:var(--radius);padding:20px 18px;
+  }
+  .cta h2{font-size:21px;margin:0 0 6px;line-height:1.25;letter-spacing:-.01em}
+  .cta p{margin:0 0 16px;font-size:15.5px;line-height:1.5}
+  .cta p strong{font-weight:800}
+  .cta-btns{display:flex;gap:10px;flex-wrap:wrap}
+  .cta-btns a{
+    display:inline-flex;align-items:center;justify-content:center;min-height:48px;
+    border-radius:10px;padding:12px 18px;font-weight:800;font-size:15.5px;text-decoration:none;
+  }
+  .cta-primary{background:#0a1424;color:#fff !important}
+  .cta-mail{background:transparent;color:var(--amber-dark) !important;border:2px solid rgba(26,18,0,.55);word-break:break-all}
+
+  /* Browse */
+  .browse{margin-top:34px}
+  .browse h2{font-size:20px;margin:0 0 4px}
+  .browse>p{color:var(--muted);font-size:14.5px;margin:0 0 14px}
+  .browse-list{display:grid;gap:8px}
+  @media(min-width:620px){.browse-list{grid-template-columns:1fr 1fr}}
+  .browse-item{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;
+    background:var(--card);border:1px solid var(--line-soft);border-radius:10px;
+    padding:12px 14px;cursor:pointer;color:var(--text);width:100%;
+  }
+  .browse-item:hover{border-color:var(--amber)}
+  .browse-item .b-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:var(--amber);display:block}
+  .browse-item .b-name{font-size:14.5px;font-weight:650;display:block;margin-top:1px}
+  .browse-item .arr{color:var(--faint);font-size:18px;flex:0 0 auto}
+
+  .how{margin-top:34px;display:grid;gap:10px}
+  @media(min-width:620px){.how{grid-template-columns:repeat(3,1fr)}}
+  .how div{background:var(--card);border:1px solid var(--line-soft);border-radius:10px;padding:14px}
+  .how b{color:var(--amber);display:block;font-size:13px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+  .how span{font-size:14.5px;color:var(--muted)}
+
+  footer{
+    margin-top:40px;border-top:1px solid var(--line-soft);padding-top:18px;
+    font-size:13.5px;color:var(--faint);line-height:1.6;
+  }
+  footer strong{color:var(--muted)}
+  .err-msg{color:var(--red);font-size:14px;margin:10px 2px 0;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand-row">
+      <span class="brand">PATCH!</span>
+      <span class="brand-sub">Software problems, fixed in place.</span>
+    </div>
+    <h1>The Error <em>Decoder</em></h1>
+    <p class="subhead">Paste any error message, get <strong>plain English</strong> back — what it means, why it happened, and the first fix to try. Free. No account, no install.</p>
+  </header>
+
+  <main>
+    <section class="decoder" aria-label="Error decoder">
+      <label for="errInput">Paste the error — exactly as it appeared</label>
+      <p class="hint">The whole message, the code, the pop-up text — all of it. The exact wording is the diagnosis.</p>
+      <textarea id="errInput" placeholder="e.g. Windows Update failed — error 0x80070005 (Access is denied)" autocomplete="off" spellcheck="false"></textarea>
+      <div class="actions">
+        <button class="btn-decode" id="decodeBtn" type="button">Decode it →</button>
+        <button class="btn-clear" id="clearBtn" type="button">Clear</button>
+      </div>
+      <p class="kbd-hint">Tip: <kbd>Ctrl</kbd> + <kbd>Enter</kbd> also decodes.</p>
+      <p class="err-msg" id="emptyMsg">Paste an error message first — even just the code, like 0x80070005.</p>
+      <div class="privacy">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" stroke="#f2a81d" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#f2a81d" stroke-width="2"/></svg>
+        <span><strong>Private by design.</strong> Runs entirely in your browser. Nothing you paste is sent anywhere or stored.</span>
+      </div>
+    </section>
+
+    <section class="examples" aria-label="Try an example">
+      <p>Try one — tap to decode it</p>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <section id="result" aria-live="polite"></section>
+
+    <section class="browse" aria-label="Browse the decoder">
+      <h2>What this decoder knows</h2>
+      <p>Thirteen of the errors that waste the most people's days. Tap any one to see its decode.</p>
+      <div class="browse-list" id="browseList"></div>
+    </section>
+
+    <section class="how" aria-label="How decoding works">
+      <div><b>1 · Plain English</b><span>What the message actually means, without the jargon.</span></div>
+      <div><b>2 · Likely cause</b><span>Why it happened on your machine, not in general.</span></div>
+      <div><b>3 · First fix</b><span>The safest steps first, in order. Stop when it works.</span></div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>Built and run by Patch! — Herodotus Tree LLC</strong> · Software problems, fixed in place. Flat prices in writing, no hourly billing.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KB = [
+    {
+      code:"0x80070005",
+      name:"Access Denied — Windows",
+      plain:"Something tried to open, change, or install a file — and Windows said no. The account or program doing it doesn't have permission to touch what it's touching.",
+      cause:"Permissions or file ownership got bent — most often after a Windows update, a program install, or security software locking a file down.",
+      steps:[
+        "Restart the computer once. A surprising number of these are a file stuck open, and a clean restart lets go of it.",
+        "Try again running as administrator: right-click the program (or the update) and choose \u201CRun as administrator.\u201D",
+        "If this is Windows Update failing: pause updates for 1 week (Settings \u2192 Windows Update \u2192 Pause), restart, then resume and retry.",
+        "Check your antivirus quarantine — if it recently grabbed a file from this program, that's your culprit."
+      ],
+      bigger:"If it survives a restart and an administrator run, the account's permissions or system files themselves are bent. That's no longer a settings fix — it's a repair.",
+      patterns:[/0x80070005/g,/access is denied/g,/access denied/g,/e_accessdenied/g]
+    },
+    {
+      code:"404",
+      name:"Not Found — page or file missing",
+      plain:"The server answered you — the website is up. It just doesn't have the page you asked for. The page is gone, it moved, or the link itself is wrong.",
+      cause:"A deleted or renamed page, a broken link someone shared, or one wrong character in the address. On Linux-based servers, capital letters count: Page.html and page.html are two different files.",
+      steps:[
+        "Read the address character by character — one typo is all it takes.",
+        "Cut the address back to just the home page (everything before the first single slash) and navigate to the page from there.",
+        "If it's your site: check the exact filename on the server, capitals included, and that the file actually uploaded."
+      ],
+      bigger:"One dead link is normal. Every page on the site returning 404 is a server or configuration fault — the site itself is broken, not the links.",
+      patterns:[/\b404\b/g,/not found/g,/page not found/g,/http error 404/g]
+    },
+    {
+      code:"500 · 502 · 503",
+      name:"Server Error — the website's side failed",
+      plain:"This one is not you. The website's own server tried to answer and failed — internal error (500), a bad handoff between its servers (502), or it's overloaded / down for maintenance (503).",
+      cause:"Most often the last change made to the site: a plugin or software update, a code edit, or a traffic spike the server couldn't carry.",
+      steps:[
+        "Wait a full 2 minutes, then refresh once. Hammering refresh makes an overloaded server worse, not better.",
+        "Check whether it's just you: try the site on your phone with Wi-Fi off. If it fails there too, it's the site.",
+        "If it's your site: undo the last change first — the most recent plugin update or edit is the prime suspect. Roll that back before touching anything else."
+      ],
+      bigger:"If your business site is still down after one rollback attempt, stop guessing. Every hour down is customers turned away — that's diagnostic work.",
+      patterns:[/\b500\b/g,/\b502\b/g,/\b503\b/g,/internal server error/g,/bad gateway/g,/service unavailable/g,/service temporarily unavailable/g]
+    },
+    {
+      code:"DNS_PROBE_FINISHED_NXDOMAIN",
+      name:"Address doesn't resolve — DNS failure",
+      plain:"Your browser asked the internet's phone book where that address lives, and the phone book said: no such name. The site may exist — but this address, spelled this way, doesn't resolve to anything.",
+      cause:"A typo'd address, a domain that expired or was never registered, your router's DNS cache holding a bad answer, or the site's own DNS records broken.",
+      steps:[
+        "Check the spelling of the address first — especially .com vs .net, and extra letters.",
+        "Test a site you know works (any big site). If that loads, the problem is that one address, not your connection.",
+        "Restart the router properly: unplug it, count to 30, plug it back in, give it 2 minutes.",
+        "On Windows, clear the stale cache: open Command Prompt and run  ipconfig /flushdns  — then try again."
+      ],
+      bigger:"If this is your business domain, this is urgent: if the name doesn't resolve, your website AND your email are down at the same time.",
+      patterns:[/dns_probe/g,/nxdomain/g,/err_name_not_resolved/g,/name not resolved/g,/dns probe finished/g]
+    },
+    {
+      code:"ERR_CERT · SSL",
+      name:"\u201CYour connection is not private\u201D — certificate warning",
+      plain:"The site couldn't prove it is who it claims to be. Browsers show this when the site's identity certificate is expired, wrong, or can't be verified — so the browser stops you before you hand it anything sensitive.",
+      cause:"On your side: a wrong device clock (certificates are checked against the date). On the site's side: an expired or misconfigured certificate. On public Wi-Fi: the network's sign-in page getting in the way.",
+      steps:[
+        "Set your device's date and time to automatic (Settings \u2192 Date & time). A clock off by a day fails every certificate check.",
+        "Try a different network — your phone's data instead of the Wi-Fi, or vice versa. If it works there, the first network was intercepting.",
+        "Never enter passwords or card numbers past this warning. Going \u201CAdvanced \u2192 Proceed\u201D to read an article is one thing; banking past it is another."
+      ],
+      bigger:"If customers are seeing this on YOUR site, your certificate has expired or broken — and every visitor is being warned away. Fix it today, not this week.",
+      patterns:[/not private/g,/err_cert/g,/certificate/g,/\bssl\b/g,/cert authority/g,/cert_date/g,/cert_common/g,/privacy error/g]
+    },
+    {
+      code:"QuickBooks H202",
+      name:"QuickBooks H202 — can't reach the company file",
+      plain:"QuickBooks on this workstation can't reach the computer that holds the company file. The file is fine — the path to it is broken.",
+      cause:"The host PC is off, asleep, or its hosting got turned off; the workstation flipped into the wrong mode; or a Windows update on the host quietly changed the firewall rules QuickBooks depends on.",
+      steps:[
+        "Go to the host computer first: confirm it's on, awake, and QuickBooks hosting is ON there (File \u2192 Utilities \u2014 it should say \u201CHost Multi-User Access\u201D is active).",
+        "On the workstation, toggle the mode: File \u2192 Utilities — switch to single-user, then back to multi-user. That forces a fresh connection.",
+        "Restart in order: host computer first, let it fully boot, then the workstation.",
+        "If this started right after a Windows update on the host, check its firewall — updates reset the QuickBooks ports more often than anyone admits."
+      ],
+      bigger:"H202 that keeps coming back means the hosting setup itself is wrong — a workstation hosting by accident, or two machines fighting to host. Set up right once, it stops.",
+      patterns:[/h202/g,/quickbooks/g,/company file/g,/\b6000\b/g,/error 6000/g,/multi-user/g]
+    },
+    {
+      code:"0x0000011b",
+      name:"Printer sharing blocked — Windows",
+      plain:"Windows is refusing to connect to a printer shared from another PC. Nothing is wrong with the printer — a Windows security update changed the rules for printer sharing, and the two PCs are now playing by different rules.",
+      cause:"Microsoft tightened print-sharing security (the PrintNightmare fixes). When one PC has the update and the other doesn't — or they landed at different times — sharing breaks with exactly this code.",
+      steps:[
+        "Install ALL pending Windows updates on BOTH computers — the sharing PC and the one connecting. Then restart both. Half-updated pairs are the #1 cause.",
+        "On the connecting PC, remove the printer (Settings \u2192 Bluetooth & devices \u2192 Printers) and add it again fresh.",
+        "On the sharing PC, restart the Print Spooler: press Win+R, type services.msc, find \u201CPrint Spooler,\u201D right-click \u2192 Restart."
+      ],
+      bigger:"If it breaks again after every update cycle, the sharing setup needs to be rebuilt once, properly — not patched monthly.",
+      patterns:[/0x0000011b/g,/0000011b/g,/printer.*shar/g,/shar.*printer/g,/print spooler/g,/operation failed.*printer/g]
+    },
+    {
+      code:"No internet, secured",
+      name:"Connected to the router, not the internet",
+      plain:"Your device is talking to your router just fine — that's the \u201Csecured\u201D part. The router just isn't reaching the internet, or isn't passing it through to you.",
+      cause:"The modem lost its connection to your provider, the router's session went stale, or your device never got a proper address from the router.",
+      steps:[
+        "Restart in order — this order matters: unplug the MODEM first, then the router. Wait 30 seconds. Plug the modem in, let it fully light up (2–3 minutes), then the router.",
+        "Check the scope: is every device down, or just this one? Everything down = modem or your internet provider. One device = that device.",
+        "On the problem device: forget the Wi-Fi network and reconnect fresh, password and all.",
+        "Check your IP address: if it starts with 169.254, your device asked for an address and never got one — that's the router not answering."
+      ],
+      bigger:"One device stuck at a 169.254 address while everything else works means that device's network stack is damaged. The network is fine — the machine isn't.",
+      patterns:[/no internet, secured/g,/no internet secured/g,/limited connectivity/g,/connected, no internet/g,/no internet access/g,/169\.254/g]
+    },
+    {
+      code:"Outlook 0x8004010F",
+      name:"Outlook lost the mail file",
+      plain:"Outlook can't find or can't open the data file where it keeps your mail on this PC. Your mail is not deleted — Outlook has lost track of where it lives.",
+      cause:"The mail file (the .ost) got corrupted or moved, the profile points at a file that isn't there anymore, or Outlook was closed mid-write one too many times.",
+      steps:[
+        "Fully close Outlook — check it's really gone in Task Manager — then reopen it. Half-closed Outlook causes half of these.",
+        "Verify the account is looking at the right mailbox: File \u2192 Account Settings \u2192 Account Settings. Confirm your mailbox is listed and set as default.",
+        "Rebuild the mail file: with Outlook CLOSED, find the .ost file (File \u2192 Account Settings \u2192 Data Files \u2192 Open File Location), rename it from .ost to .ost.old, then reopen Outlook. It rebuilds a fresh copy from the server."
+      ],
+      bigger:"Never delete the .ost before confirming the mail exists on the server (check webmail first). If the mailbox only ever lived in that file, deleting it deletes the mail.",
+      patterns:[/0x8004010f/g,/outlook/g,/\.ost/g,/\bost\b/g,/data file cannot be accessed/g,/outlook disconnected/g]
+    },
+    {
+      code:"Disk full",
+      name:"Out of space — the machine has no room to work",
+      plain:"The drive (or memory) is full, so the machine has nowhere to put things while it works. Programs stall, saves fail, and updates refuse — not because they're broken, but because there's no room.",
+      cause:"The usual pile-up: Downloads folder, years of photos/video, old updates, and programs quietly caching. Memory (\u201Cout of memory\u201D) errors are the same idea in the short term — too much open at once.",
+      steps:[
+        "See what's actually eating it: Settings \u2192 System \u2192 Storage. Don't guess — the biggest category is usually a surprise.",
+        "Empty the easy wins: Downloads folder (sort by size), then the Recycle Bin — deleting isn't done until the bin is emptied.",
+        "Aim for 10–15% of the drive free. Below that, Windows itself starts failing at its own jobs.",
+        "For \u201Cout of memory\u201D: close browser tabs first (they're the usual hog), then restart the machine to clear the slate."
+      ],
+      bigger:"A drive that fills back up within days of a cleanup has something actively writing to it — a runaway log, a backup gone wrong, or worse. That needs finding, not more deleting.",
+      patterns:[/not enough space/g,/disk full/g,/out of memory/g,/storage full/g,/low disk/g,/insufficient space/g,/no space left/g,/out of storage/g]
+    },
+    {
+      code:"Update failed",
+      name:"Windows update rolled back",
+      plain:"Windows tried to update, hit something it couldn't get past, and undid the changes to get you back to a working machine. The rollback worked — the update didn't.",
+      cause:"Not enough free disk space is the quiet #1. After that: a driver that doesn't survive the update, security software interfering mid-install, or one specific update (identified by its KB number) that's bad for your configuration.",
+      steps:[
+        "Restart once and try the update again — a clean boot clears locked files that block installs.",
+        "Free disk space BEFORE retrying: get to 15% free (Settings \u2192 System \u2192 Storage). Retrying on a full drive just fails again.",
+        "Write down the exact KB number and error code from the failure (Settings \u2192 Windows Update \u2192 Update history). That code is the diagnosis — everything else is guessing."
+      ],
+      bigger:"An update loop running over a day — failing, undoing, retrying — is one bad boot away from a machine that doesn't start. Don't let it ride.",
+      patterns:[/couldn't complete the updates/g,/couldnt complete the updates/g,/update failed/g,/undoing changes/g,/0x800f/g,/installation failed.*update/g,/we couldn't complete/g,/failure configuring windows updates/g]
+    },
+    {
+      code:"401 · 403",
+      name:"Refused — wrong password or no permission",
+      plain:"The system isn't broken — it's refusing you. 401 means it doesn't accept who you say you are (wrong or expired password). 403 means it knows exactly who you are — and you're not allowed in.",
+      cause:"Autofill entering an old saved password, caps lock, being signed into the wrong account (work vs. personal is the classic), or genuinely not having been granted access yet.",
+      steps:[
+        "Type the password into a notes app first, where you can SEE it, check it, then paste it in. This one trick settles \u201Cbut I'm typing it right\u201D in ten seconds.",
+        "Clear the saved password for that site/app and type it fresh — autofill lies with total confidence.",
+        "Check which account you're signed in as. Work file + personal account = refused every time, correctly.",
+        "Getting 403? Stop retrying passwords — you're in, you're just not allowed. Ask the file/system owner to grant you access."
+      ],
+      bigger:"Locked out of business systems where nobody's sure who owns what — that's an ownership tangle, and it only gets worse the longer it sits.",
+      patterns:[/permission denied/g,/incorrect password/g,/\b401\b/g,/\b403\b/g,/forbidden/g,/unauthorized/g,/access forbidden/g,/password is incorrect/g]
+    },
+    {
+      code:"Timeout",
+      name:"Timed out — no answer in time",
+      plain:"One side asked, and the other side never answered in time — so the first side gave up. A program saying \u201CNot Responding\u201D is the same thing viewed from your side of the glass.",
+      cause:"A slow or stalled server, a program hung on one heavy file or one bad network drive, or a connection that dropped mid-conversation (that's the \u201Cconnection reset\u201D version).",
+      steps:[
+        "Retry once. Timeouts are often traffic, not damage — the second attempt goes through.",
+        "For a \u201CNot Responding\u201D program: give it 60 full seconds before force-closing. Big files and network drives are slow, not dead — and force-closing mid-save is how files corrupt.",
+        "Note what you clicked in the 10 seconds right before it stalled. That action is the clue — write it down while it's fresh."
+      ],
+      bigger:"The same action timing out in the same place every time isn't slowness — it's a map. It points at the exact component that's failing.",
+      patterns:[/timed out/g,/timeout/g,/time out/g,/not responding/g,/connection reset/g,/err_connection/g,/request timed/g,/gateway timeout/g,/\b504\b/g]
+    }
+  ];
+
+  var EXAMPLES = [
+    {label:"0x80070005", text:"Windows Update failed. Error 0x80070005 — Access is denied.", plain:false},
+    {label:"404 Not Found", text:"404 Not Found — the page you requested was not found on this server.", plain:false},
+    {label:"DNS_PROBE_FINISHED_NXDOMAIN", text:"This site can't be reached. DNS_PROBE_FINISHED_NXDOMAIN", plain:false},
+    {label:"QuickBooks Error H202", text:"QuickBooks Error H202 — this workstation can't open the company file in multi-user mode.", plain:false},
+    {label:"0x0000011b printer", text:"Windows couldn't connect to the printer. Operation failed with error 0x0000011b.", plain:false},
+    {label:"Your connection is not private", text:"Your connection is not private. Attackers might be trying to steal your information. NET::ERR_CERT_AUTHORITY_INVALID", plain:true},
+    {label:"No internet, secured", text:"Wi-Fi shows: No internet, secured. Connected to the router but nothing loads.", plain:true},
+    {label:"Outlook 0x8004010F", text:"Outlook error 0x8004010F — the data file cannot be accessed. Outlook is disconnected.", plain:false}
+  ];
+
+  var input = document.getElementById("errInput");
+  var resultEl = document.getElementById("result");
+  var emptyMsg = document.getElementById("emptyMsg");
+  var chipsEl = document.getElementById("chips");
+  var browseEl = document.getElementById("browseList");
+
+  EXAMPLES.forEach(function(ex){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (ex.plain ? " plain" : "");
+    b.textContent = ex.label;
+    b.addEventListener("click", function(){
+      input.value = ex.text;
+      emptyMsg.style.display = "none";
+      decode();
+      input.focus();
+    });
+    chipsEl.appendChild(b);
+  });
+
+  KB.forEach(function(entry, i){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "browse-item";
+    b.innerHTML = '<span><span class="b-code"></span><span class="b-name"></span></span><span class="arr" aria-hidden="true">›</span>';
+    b.querySelector(".b-code").textContent = entry.code;
+    b.querySelector(".b-name").textContent = entry.name;
+    b.addEventListener("click", function(){
+      var sample = EXAMPLES.filter(function(e){ return scoreText(e.text).best === entry; })[0];
+      input.value = sample ? sample.text : (entry.code + " — " + entry.name);
+      emptyMsg.style.display = "none";
+      renderResult(entry, input.value);
+      window.scrollTo({top:0, behavior:"smooth"});
+    });
+    browseEl.appendChild(b);
+  });
+
+  function scoreText(raw){
+    var text = " " + raw.toLowerCase() + " ";
+    var best = null, bestScore = 0, scores = [];
+    KB.forEach(function(entry){
+      var s = 0;
+      entry.patterns.forEach(function(re){
+        var m = text.match(re);
+        if(m) s += m.length * 10 + (re.source.length > 12 ? 6 : 0);
+      });
+      scores.push(s);
+      if(s > bestScore){ bestScore = s; best = entry; }
+    });
+    return {best: best, score: bestScore};
+  }
+
+  function esc(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function ctaHTML(){
+    return '<div class="cta">'
+      + '<h2>Still stuck? A decoder reads one message. A diagnostic reads the whole machine.</h2>'
+      + '<p>The decode above is the first step, free. If the fix didn\u2019t hold — or the problem is bigger than one message — a full Patch! diagnostic finds the actual cause, and <strong>the $250 is credited toward the fix.</strong></p>'
+      + '<div class="cta-btns">'
+      + '<a class="cta-primary" href="https://patch.herodotustree.com" target="_blank" rel="noopener">Get the full diagnostic →</a>'
+      + '<a class="cta-mail" href="mailto:hero.ustree@gmail.com">hero.ustree@gmail.com</a>'
+      + '</div></div>';
+  }
+
+  function renderResult(entry, raw){
+    var steps = entry.steps.map(function(s){ return "<li>" + esc(s) + "</li>"; }).join("");
+    resultEl.innerHTML =
+      '<div class="result-card">'
+      + '<div class="code-line">' + esc(entry.code) + '</div>'
+      + '<h2>' + esc(entry.name) + '</h2>'
+      + '<p class="matched-note">Matched from what you pasted: <code>' + esc(raw.length > 140 ? raw.slice(0,140) + "…" : raw) + '</code></p>'
+      + '<div class="block"><h3>What it means</h3><p>' + esc(entry.plain) + '</p></div>'
+      + '<div class="block"><h3>Likely cause</h3><p>' + esc(entry.cause) + '</p></div>'
+      + '<div class="block"><h3>First fix — in order</h3><ol>' + steps + '</ol></div>'
+      + '<div class="block bigger"><h3>When it\u2019s bigger than this</h3><p>' + esc(entry.bigger) + '</p></div>'
+      + '<div class="result-actions"><button type="button" class="btn-ghost" id="copyBtn">Copy this decode</button><span class="copy-ok" id="copyOk">Copied ✓</span></div>'
+      + '</div>'
+      + ctaHTML();
+    resultEl.classList.add("show");
+    wireCopy(entry);
+    resultEl.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function renderFallback(raw){
+    resultEl.innerHTML =
+      '<div class="result-card no-match">'
+      + '<div class="code-line" style="color:var(--faint)">NO MATCH IN THE DECODER</div>'
+      + '<h2>That one isn\u2019t in the decoder — yet.</h2>'
+      + '<p class="matched-note">You pasted: <code>' + esc(raw.length > 140 ? raw.slice(0,140) + "…" : raw) + '</code></p>'
+      + '<div class="block"><h3>The three things that matter</h3><ol>'
+      + '<li><strong>The exact code, character for character.</strong> 0x80070005 and 0x80070057 are different problems with different fixes. Copy it — don\u2019t retype it from memory.</li>'
+      + '<li><strong>What changed recently.</strong> An update, a new program, a move, a new router, a password change. Errors rarely appear from nowhere — they follow a change.</li>'
+      + '<li><strong>What you were doing in the 10 seconds before.</strong> The click right before the stall, the file you just opened, the button you just pressed. That action is the clue.</li>'
+      + '</ol></div>'
+      + '<div class="block"><h3>Safe first move</h3><p>Restart once — a full restart, not sleep. If the error survives a clean restart, it\u2019s real and repeatable. And real and repeatable is exactly what makes a problem diagnosable.</p></div>'
+      + '<div class="block bigger"><h3>When it\u2019s bigger than this</h3><p>If it comes back after the restart, write down those three things above and bring them with the error. That\u2019s a head start on a real diagnostic — not a dead end.</p></div>'
+      + '</div>'
+      + ctaHTML();
+    resultEl.classList.add("show");
+    resultEl.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function wireCopy(entry){
+    var btn = document.getElementById("copyBtn");
+    var ok = document.getElementById("copyOk");
+    if(!btn) return;
+    btn.addEventListener("click", function(){
+      var text = "PATCH! ERROR DECODER\n" + entry.code + " — " + entry.name
+        + "\n\nWHAT IT MEANS\n" + entry.plain
+        + "\n\nLIKELY CAUSE\n" + entry.cause
+        + "\n\nFIRST FIX\n" + entry.steps.map(function(s,i){ return (i+1) + ". " + s; }).join("\n")
+        + "\n\nWHEN IT'S BIGGER THAN THIS\n" + entry.bigger;
+      function done(){ ok.style.display = "inline"; setTimeout(function(){ ok.style.display = "none"; }, 2200); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand("copy"); }catch(e){}
+        document.body.removeChild(ta); done();
+      }
+    });
+  }
+
+  function decode(){
+    var raw = input.value.trim();
+    if(!raw){
+      emptyMsg.style.display = "block";
+      input.focus();
+      return;
+    }
+    emptyMsg.style.display = "none";
+    var res = scoreText(raw);
+    if(res.best && res.score >= 10){
+      renderResult(res.best, raw);
+    } else {
+      renderFallback(raw);
+    }
+  }
+
+  document.getElementById("decodeBtn").addEventListener("click", decode);
+  document.getElementById("clearBtn").addEventListener("click", function(){
+    input.value = "";
+    resultEl.classList.remove("show");
+    resultEl.innerHTML = "";
+    emptyMsg.style.display = "none";
+    input.focus();
+  });
+  input.addEventListener("keydown", function(e){
+    if((e.ctrlKey || e.metaKey) && e.key === "Enter"){ e.preventDefault(); decode(); }
+  });
+  input.addEventListener("input", function(){ if(input.value.trim()) emptyMsg.style.display = "none"; });
+})();
+</script>
+</body>
+</html>
